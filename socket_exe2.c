@@ -8,6 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <stdlib.h>
+
+#define BUFFER_SIZE 10000
 
 /*2. Faça um programa cliente para se conectar a um servidor FTP (ProFTPD instalado na máquina
 Linux).
@@ -16,7 +19,7 @@ após a mensagem de boas vindas enviada pelo servidor, permitir que o usuário e
 o servidor (a conexão entre cliente-servidor deverá permanecer ativa e aguardando por envio de
 comando pelo cliente até que o usuário envie o comando quit).
 
-Após a conexão, o servidor ifca aguardando que o programa cliente envie os comando de autenticação:
+Após a conexão, o servidor fica aguardando que o programa cliente envie os comando de autenticação:
 usuário e senha (nessa ordem).
 O usuário deverá digitar seu usuário e senha e o programa cliente deve enviar os dados para o
 servidor com a sintaxe correta.
@@ -39,9 +42,16 @@ int main(void){
     int con, sockid;
     sockid = socket(AF_INET, SOCK_STREAM, 0);
     char ende[20];
+    char user[30];
+    char pass[30];
     int port;
+    char cmd[500];
+    char get_concat_user[500];
+    char get_concat_pass[500];
     char get_concat[500];
     struct in_addr addr;
+    char buffer[BUFFER_SIZE];
+    int control = 1;
 
     printf("\nInsira um endereco ip: \n");
     scanf("%s", ende);
@@ -54,12 +64,97 @@ int main(void){
 
     con = connect(sockid, (struct sockaddr *)&sock, sizeof(sock));
 
+
     if (con < 0){
         printf("\nErro ao conectar\n");
     }
     else{
         printf("\nConectado\n");
     }
+
+    while(control == 1){
+        if (recv(sockid, buffer, BUFFER_SIZE-1, 0) != 0){
+            printf("\n%s\r\n", buffer);
+            bzero(buffer, BUFFER_SIZE);
+
+            printf("\nInsira um usuário: \n");
+            scanf("%s", cmd);
+            __fpurge(stdin);
+            snprintf(get_concat_user, sizeof(get_concat_user), "%s\n", user);
+            send(sockid, get_concat, strlen(get_concat), 0);
+            printf("\n%s\r\n", buffer);
+            bzero(buffer, BUFFER_SIZE);
+
+            printf("\nInsira uma senha: \n");
+            scanf("%s", cmd);
+            __fpurge(stdin);
+            snprintf(get_concat_user, sizeof(get_concat_user), "%s\n", user);
+            send(sockid, get_concat, strlen(get_concat), 0);
+            printf("\n%s\r\n", buffer);
+            bzero(buffer, BUFFER_SIZE);
+
+            printf("\nInsira um comando: \n");
+            scanf("%s", cmd);
+            __fpurge(stdin);
+            snprintf(get_concat, sizeof(get_concat), "%s\n", cmd);
+            send(sockid, get_concat, strlen(get_concat), 0);
+            printf("\n%s\r\n", buffer);
+            bzero(buffer, BUFFER_SIZE);
+
+            // TESTAR TUDO ISOS ACIMA!!!!!
+        }
+    }
+    /*bzero(buffer, BUFFER_SIZE);
+    while(control == 1)
+    {   
+        if (recv(sockid, buffer, BUFFER_SIZE-1, 0) != 0){
+            printf("%s", buffer);
+            bzero(buffer, BUFFER_SIZE);
+            printf("\nDigite o usuário:\n");
+            scanf("%s", user);
+            __fpurge(stdin);
+            if(send(sockid, user, strlen(user), 0)==-1){
+                printf("\nErro ao enviar usuário.\n");
+            }
+            else {
+                recv(sockid, buffer, BUFFER_SIZE-1, 0);
+                printf("\n%s\n", buffer);
+                bzero(buffer, BUFFER_SIZE);
+            }
+
+            printf("\nDigite a senha:\n");
+            scanf("%s", pass);
+            __fpurge(stdin);
+
+            if(send(sockid, pass, strlen(pass), 0)==-1){
+                printf("\nErro ao enviar senha.\n");
+            } 
+            else{
+                recv(sockid, buffer, BUFFER_SIZE-1, 0);
+                printf("\n%s\n", buffer);
+                bzero(buffer, BUFFER_SIZE);
+            }
+
+            printf("\nDigite o comando:\n");
+            scanf("%s", cmd);
+            __fpurge(stdin);
+            if (strcmp(cmd, "quit") == 0){
+                control = 0;
+            }
+            else{
+                recv(sockid, buffer, BUFFER_SIZE-1, 0);
+                printf("\n%s\n", buffer);
+                bzero(buffer, BUFFER_SIZE);
+            }
+        
+        }
+        else{
+            exit(0);
+        }
+        
+    }*/
+
+    //printf("\nInsira um usuario: \n");
 
     close(sockid);
 }

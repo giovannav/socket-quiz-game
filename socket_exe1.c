@@ -27,7 +27,6 @@ página html (index.html) teste e coloque dentro do servidor.
 int main(void){
     struct sockaddr_in sock;
     int con, sockid;
-    sockid = socket(AF_INET, SOCK_STREAM, 0);
     char ende[20];
     char pag[100];
     int port;
@@ -42,6 +41,8 @@ int main(void){
     scanf("%s", pag);
     __fpurge(stdin);
 
+    sockid = socket(AF_INET, SOCK_STREAM, 0); //criando o socket
+    
     bzero(&(sock), sizeof(sock));    
     sock.sin_family = AF_INET;
     sock.sin_port = htons(80);
@@ -55,7 +56,7 @@ int main(void){
     else{
         printf("\nConectado\n");
     }
-
+    bzero(buffer, BUFFER_SIZE);
     snprintf(get_concat, sizeof(get_concat), "GET /%s\r\n", pag);
     printf("\n%s\n", get_concat);
 
@@ -70,7 +71,7 @@ int main(void){
     while(recv(sockid, buffer, BUFFER_SIZE-1, 0) != 0)
     {
         printf("%s", buffer);
-        bzero(buffer, BUFFER_SIZE);
+       
     }
     close(sockid);
 }
