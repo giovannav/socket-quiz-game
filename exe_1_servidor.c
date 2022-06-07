@@ -13,6 +13,7 @@
 
 int connect_client2()
 {
+    //nc -l -p 5000
     struct sockaddr_in sock;
     int con, sockid;
     char buffer[BUFFER_SIZE];
