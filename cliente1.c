@@ -12,18 +12,6 @@
 #include <locale.h>
 
 #define BUFFER_SIZE 1024
-#define QUESTION_SIZE 200
-
-typedef struct
-{
-    char pergunta[QUESTION_SIZE];
-    char resp_1[QUESTION_SIZE];
-    char resp_2[QUESTION_SIZE];
-    char resp_3[QUESTION_SIZE];
-    char resp_4[QUESTION_SIZE];
-    char resp_certa[QUESTION_SIZE];
-
-} Pergunta;
 
 struct cliente2
 {
@@ -57,7 +45,6 @@ Cliente2 welcome()
 
 int main(void)
 {
-    Pergunta p1;
 
     struct sockaddr_in sock;
     int con, sockid;
@@ -172,8 +159,8 @@ int main(void)
                 fgets(buffer_send, BUFFER_SIZE, stdin);
                 __fpurge(stdin);
                 fflush(stdin);
-                printf("Resposta certa: %s\n", p1.resp_certa);
-                send(sockid, p1.resp_certa, strlen(p1.resp_certa), 0);
+                printf("Resposta certa: %s\n", buffer_send);
+                send(sockid, buffer_send, strlen(buffer_send), 0);
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_recv, sizeof(buffer_recv));
             }

@@ -10,10 +10,24 @@
 #include <time.h>
 
 #define BUFFER_SIZE 1024
+#define QUESTION_SIZE 2048
+
+
+typedef struct
+{
+    char pergunta[QUESTION_SIZE];
+    char resp_1[QUESTION_SIZE];
+    char resp_2[QUESTION_SIZE];
+    char resp_3[QUESTION_SIZE];
+    char resp_4[QUESTION_SIZE];
+    char resp_certa[QUESTION_SIZE];
+
+} Pergunta;
 
 int connect_client2(char *ip, char *port)
 {
     // nc -l -p 5000
+
     struct sockaddr_in sock;
     int con, sockid;
     char buffer[BUFFER_SIZE];
@@ -31,7 +45,7 @@ int connect_client2(char *ip, char *port)
     else
     {
         printf("\nConexão realizada: %d na porta %d \n", con, 5000);
-        send(sockid, "Ola\n", strlen("Ola\n"), 0);
+        send(sockid, "Ola", strlen("Ola\n"), 0);
         recv(sockid, buffer, BUFFER_SIZE - 1, 0);
         printf("%s", buffer);
         close(sockid);
@@ -39,7 +53,8 @@ int connect_client2(char *ip, char *port)
 }
 
 int main(void)
-{
+{   
+    Pergunta p[3];
     int sockid;
     sockid = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -155,7 +170,8 @@ int main(void)
                         printf("\nMensagem: %s \n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nPergunta recebida: %s", msg_received);
+                        strcpy(p[i].pergunta, msg_received);
+                        printf("\nPergunta recebida: %s", p[i].pergunta);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
 
@@ -163,7 +179,8 @@ int main(void)
                         printf("\nMensagem: %s\n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nResposta 1: %s", msg_received);
+                        strcpy(p[i].resp_1, msg_received);
+                        printf("\nResposta 1: %s", p[i].resp_1);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
 
@@ -171,7 +188,8 @@ int main(void)
                         printf("\nMensagem: %s\n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nResposta 2: %s", msg_received);
+                        strcpy(p[i].resp_2, msg_received);
+                        printf("\nResposta 2: %s", p[i].resp_2);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
 
@@ -179,7 +197,8 @@ int main(void)
                         printf("\nMensagem: %s\n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nResposta 3: %s", msg_received);
+                        strcpy(p[i].resp_3, msg_received);
+                        printf("\nResposta 3: %s", p[i].resp_3);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
 
@@ -187,7 +206,8 @@ int main(void)
                         printf("\nMensagem: %s\n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nResposta 4: %s", msg_received);
+                        strcpy(p[i].resp_4, msg_received);
+                        printf("\nResposta 4: %s", p[i].resp_4);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
 
@@ -195,10 +215,23 @@ int main(void)
                         printf("\nMensagem: %s\n", msg);
                         send(newSocket_1, msg, strlen(msg), 0);
                         recv(newSocket_1, msg_received, sizeof(msg_received), 0);
-                        printf("\nResposta certa: %s", msg_received);
+                        strcpy(p[i].resp_certa, msg_received);
+                        printf("\nResposta certa: %s", p[i].resp_certa);
                         bzero(msg_received, sizeof(msg_received));
                         bzero(msg, sizeof(msg));
+
+                        printf("\nValor de i: %d\n", i);
                     }
+                }
+                printf("\nFim do for.\n");
+                for (int j=1; j<=3; j++)
+                {
+                    printf("\nPergunta: %s", p[j].pergunta);
+                    printf("\nResposta 1: %s", p[j].resp_1);
+                    printf("\nResposta 2: %s", p[j].resp_2);
+                    printf("\nResposta 3: %s", p[j].resp_3);
+                    printf("\nResposta 4: %s", p[j].resp_4);
+                    printf("\nResposta certa: %s", p[j].resp_certa);
                 }
             }
             else
