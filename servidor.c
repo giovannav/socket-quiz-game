@@ -44,12 +44,14 @@ int connect_client2(char *ip, char *port)
     }
     else
     {
-        printf("\nConexão realizada: %d na porta %d \n", con, 5000);
+        printf("\nConexão realizada: %d na porta %s \n", con, port);
         send(sockid, "Ola", strlen("Ola\n"), 0);
-        recv(sockid, buffer, BUFFER_SIZE - 1, 0);
+       // recv(sockid, buffer, BUFFER_SIZE, 0);
         printf("%s", buffer);
         close(sockid);
     }
+
+    return sockid;
 }
 
 int main(void)
@@ -72,7 +74,7 @@ int main(void)
     bzero(&servidor, sizeof(servidor));
 
     servidor.sin_family = AF_INET;
-    servidor.sin_port = htons(5003);
+    servidor.sin_port = htons(5004);
     servidor.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(sockid, (struct sockaddr *)&servidor, sizeof(servidor)) < 0)
@@ -144,9 +146,6 @@ int main(void)
             bzero(msg, sizeof(msg));
             //  ------------------------------
 
-            // ---- Chama a conexão para a porta 2
-            connect_client2(get_ip, get_port);
-            //  ------------------------------
 
             // ---- Envia mensagem de inicar o jogo com o cliente 1
             strcpy(msg, "3. Deseja inicializar o jogo? (s/n)\n\n");
@@ -164,7 +163,8 @@ int main(void)
                 
                 if (strcmp(msg, "ready") == 0)
                 {
-                    for (int i = 1; i <= 3; i++)
+                    bzero(msg, sizeof(msg));
+                    for (int i = 0; i < 3; i++)
                     {
                         strcpy(msg, "Insira pergunta: ");
                         printf("\nMensagem: %s \n", msg);
@@ -233,6 +233,11 @@ int main(void)
                     printf("\nResposta 4: %s", p[j].resp_4);
                     printf("\nResposta certa: %s", p[j].resp_certa);
                 }
+
+                // ---- Chama a conexão para a porta 2
+                int newSocket_2 = connect_client2(get_ip, get_port);
+                send(newSocket_2, "1", strlen("1"), 0);
+                //  ------------------------------
             }
             else
             {

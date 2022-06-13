@@ -48,7 +48,7 @@ int main(void)
 
     struct sockaddr_in sock;
     int con, sockid;
-    int port = 5003;
+    int port = 5004;
     char ip_cliente2[20];
     char port_cliente2[20];
     char buffer_recv[BUFFER_SIZE];
@@ -77,8 +77,9 @@ int main(void)
         if (strcmp(buffer_recv, "1") == 0)
         {
             printf("Buffer valor ip: %s", c2_main.cliente2_ip);
-            send(sockid, c2_main.cliente2_ip, strlen(c2_main.cliente2_ip), 0);
-            bzero(c2_main.cliente2_ip, sizeof(c2_main.cliente2_ip));
+            strcpy(buffer_send, c2_main.cliente2_ip);
+            send(sockid, buffer_send, strlen(buffer_send), 0);
+            bzero(buffer_send, sizeof(buffer_send)); // <----- parei aqui 12:56 13/06
             bzero(buffer_recv, sizeof(buffer_recv));
         }
         if (strcmp(buffer_recv, "2") == 0)
@@ -102,7 +103,7 @@ int main(void)
             bzero(buffer_send, sizeof(buffer_send));
             send(sockid, "ready", strlen("ready"), 0);
 
-            for (int i = 1; i <= 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 recv(sockid, buffer_recv, BUFFER_SIZE, 0);
                 printf("%s ", buffer_recv);

@@ -22,9 +22,18 @@ int main(void)
     char buffer[BUFFER_SIZE];
     sockid = socket(AF_INET, SOCK_STREAM, 0);
     sock.sin_family = AF_INET;
-    sock.sin_port = htons(5000);
-    inet_pton(AF_INET, "127.0.0.1", &sock.sin_addr);
+    sock.sin_port = htons(5003);
+    sock.sin_addr.s_addr = htonl(INADDR_ANY);
     char buffer_recv[BUFFER_SIZE];
+
+    if (sockid < 0)
+    {
+        printf("Erro ao criar o socket.\n");
+        exit(1);
+    }
+
+    int opcao = 1;
+    setsockopt(sockid, SOL_SOCKET, SO_REUSEADDR, &opcao, sizeof(int));
 
     if (bind(sockid, (struct sockaddr *)&sock, sizeof(sock)) < 0)
     {
@@ -48,17 +57,28 @@ int main(void)
         {
             printf("Erro ao aceitar conexão. - socket 1\n");
         }
-        else
-        {
-            while (recv(sockid, buffer_recv, BUFFER_SIZE, 0) != 0)
-            {
-               if(strcmp(buffer_recv, "Ola") == 0)
-               {
-                    printf("%s", buffer_recv);
-               }
-                
-            }            
+        else{
+            printf("Conexão estabelecida. - socket 1\n");
+            
         }
+
+        while (recv(sockid, buffer_recv, BUFFER_SIZE, 0) != 0)
+        {
+            printf("%s\n", buffer_recv);
+            if (strcmp(buffer_recv, "1") == 0)
+            {
+                printf("Mesagem do servidor: conexão feita");
+            }
+        }
+
+       /* recv(newSocket_1, buffer_recv, BUFFER_SIZE, 0);
+        printf("Mensagem: %s\n", buffer_recv);
+        int pid = fork();
+
+        if (pid < 0)
+        {
+            printf("\nErro ao criar processo filho\n");
+        }*/
 
     }
     
