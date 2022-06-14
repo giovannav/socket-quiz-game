@@ -12,7 +12,6 @@
 #define BUFFER_SIZE 1024
 #define QUESTION_SIZE 2048
 
-
 typedef struct
 {
     char pergunta[QUESTION_SIZE];
@@ -24,17 +23,18 @@ typedef struct
 
 } Pergunta;
 
-int connect_client2(char *ip, char *port)
+int connect_client2(char *ip, char *port, Pergunta pcliente1[3])
 {
-    // nc -l -p 5000
+    Pergunta p[3] = {0};
 
     struct sockaddr_in sock;
     int con, sockid;
-    char buffer[BUFFER_SIZE];
+    char buffer[BUFFER_SIZE] = {0};
     sockid = socket(AF_INET, SOCK_STREAM, 0);
     sock.sin_family = AF_INET;
     sock.sin_port = htons(atoi(port));
     inet_pton(AF_INET, ip, &sock.sin_addr);
+    bzero(buffer, BUFFER_SIZE);
 
     con = connect(sockid, (struct sockaddr *)&sock, sizeof(sock));
     if (con < 0)
@@ -44,19 +44,110 @@ int connect_client2(char *ip, char *port)
     }
     else
     {
-        printf("\nConexão realizada: %d na porta %s \n", con, port);
-        send(sockid, "Ola", strlen("Ola\n"), 0);
-       // recv(sockid, buffer, BUFFER_SIZE, 0);
-        printf("%s", buffer);
-        close(sockid);
-    }
+        char con_info[9] = {0};
+        bzero(con_info, sizeof(con_info));
+        char msg[200] = {0};
+        bzero(msg, sizeof(msg));
+        char msg_received[200] = {0};
+        bzero(msg_received, sizeof(msg_received));
+        char get_ip[20] = {0}, get_port[20] = {0};
+        // ---- Envia mensagem de inicar o jogo com o cliente 1
+        strcpy(msg, "3. Deseja inicializar o jogo? (s/n)\n\n");
+        send(sockid, msg, strlen(msg), 0);
+        recv(sockid, con_info, sizeof(con_info), 0);
 
-    return sockid;
+        if (con_info[0] == 's')
+        {
+            bzero(msg, sizeof(msg));
+            snprintf(msg, sizeof(msg), "4");
+            printf("\nMensagem: %s\n", msg);
+            send(sockid, msg, strlen(msg), 0);
+            bzero(msg, sizeof(msg));
+            recv(sockid, msg, sizeof(msg), 0);
+
+            if (strcmp(msg, "ready") == 0)
+            {
+                bzero(msg, sizeof(msg));
+                for (int i = 0; i < 3; i++)
+                {
+                    strcpy(msg, "Insira pergunta: ");
+                    printf("\nMensagem: %s \n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].pergunta, msg_received);
+                    printf("\nPergunta recebida: %s", p[i].pergunta);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    strcpy(msg, "Insira a resposta 1: ");
+                    printf("\nMensagem: %s\n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].resp_1, msg_received);
+                    printf("\nResposta 1: %s", p[i].resp_1);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    strcpy(msg, "Insira a resposta 2: ");
+                    printf("\nMensagem: %s\n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].resp_2, msg_received);
+                    printf("\nResposta 2: %s", p[i].resp_2);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    strcpy(msg, "Insira a resposta 3: ");
+                    printf("\nMensagem: %s\n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].resp_3, msg_received);
+                    printf("\nResposta 3: %s", p[i].resp_3);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    strcpy(msg, "Insira a resposta 4: ");
+                    printf("\nMensagem: %s\n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].resp_4, msg_received);
+                    printf("\nResposta 4: %s", p[i].resp_4);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    strcpy(msg, "Insira a resposta certa: ");
+                    printf("\nMensagem: %s\n", msg);
+                    send(sockid, msg, strlen(msg), 0);
+                    recv(sockid, msg_received, sizeof(msg_received), 0);
+                    strcpy(p[i].resp_certa, msg_received);
+                    printf("\nResposta certa: %s", p[i].resp_certa);
+                    bzero(msg_received, sizeof(msg_received));
+                    bzero(msg, sizeof(msg));
+
+                    printf("\nValor de i: %d\n", i);
+                }
+            }
+            // Enviando uma questão por vez
+            //Concatenando em uma única string
+            // ---------------> parei aqui            
+                printf("\nPergunta: %s", pcliente1[0].pergunta);
+                printf("\nResposta 1: %s", pcliente1[0].resp_1);
+                printf("\nResposta 2: %s", pcliente1[0].resp_2);
+                printf("\nResposta 3: %s", pcliente1[0].resp_3);
+                printf("\nResposta 4: %s", pcliente1[0].resp_4);
+                printf("\nResposta certa: %s", pcliente1[0].resp_certa);
+            
+
+            close(sockid);
+        }
+
+        return sockid;
+    }
 }
 
 int main(void)
-{   
-    Pergunta p[3];
+{
+    Pergunta p[3] = {0};
     int sockid;
     sockid = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -116,13 +207,13 @@ int main(void)
             //  printf("\nProcesso filho criado\n");
             // ------------------------ Mensagem de boas vindas ao cliente 1
             close(sockid);
-            char con_info[9];
+            char con_info[9] = {0};
             bzero(con_info, sizeof(con_info));
-            char msg[200];
+            char msg[200] = {0};
             bzero(msg, sizeof(msg));
-            char msg_received[200];
+            char msg_received[200] = {0};
             bzero(msg_received, sizeof(msg_received));
-            char get_ip[20], get_port[20];
+            char get_ip[20] = {0}, get_port[20] = {0};
 
             // ---- Recebe o IP do cliente 2 e envia de volta ao cliente 1
             strcpy(msg, "1");
@@ -146,7 +237,6 @@ int main(void)
             bzero(msg, sizeof(msg));
             //  ------------------------------
 
-
             // ---- Envia mensagem de inicar o jogo com o cliente 1
             strcpy(msg, "3. Deseja inicializar o jogo? (s/n)\n\n");
             send(newSocket_1, msg, strlen(msg), 0);
@@ -160,7 +250,7 @@ int main(void)
                 send(newSocket_1, msg, strlen(msg), 0);
                 bzero(msg, sizeof(msg));
                 recv(newSocket_1, msg, sizeof(msg), 0);
-                
+
                 if (strcmp(msg, "ready") == 0)
                 {
                     bzero(msg, sizeof(msg));
@@ -224,7 +314,7 @@ int main(void)
                     }
                 }
                 printf("\nFim do for.\n");
-                for (int j=1; j<=3; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     printf("\nPergunta: %s", p[j].pergunta);
                     printf("\nResposta 1: %s", p[j].resp_1);
@@ -235,8 +325,8 @@ int main(void)
                 }
 
                 // ---- Chama a conexão para a porta 2
-                int newSocket_2 = connect_client2(get_ip, get_port);
-                send(newSocket_2, "1", strlen("1"), 0);
+                printf("\nChamando conexão");
+                connect_client2(get_ip, get_port, p);
                 //  ------------------------------
             }
             else

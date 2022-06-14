@@ -23,9 +23,13 @@ typedef struct cliente2 Cliente2;
 Cliente2 welcome()
 {
 
-    Cliente2 c2;
-    char get_ip[20];
-    char get_port[20];
+    Cliente2 c2 = {0};
+    char get_ip[20] = {0};
+    char get_port[20] = {0};
+    bzero(get_ip, 20);
+    bzero(get_port, 20);
+
+    
     printf("******************************");
     printf("\nBem vindo ao cliente_1.c\n");
     printf("\nCertifique-se que o cliente 2 também está online.\n");
@@ -33,13 +37,15 @@ Cliente2 welcome()
     printf("******************************");
     getchar();
     printf("\n*******\nDigite o IP com que deseja se conectar:\n*******\n");
-    scanf("%s", c2.cliente2_ip);
+    scanf("%s", get_ip);
+    fflush(stdin);
     __fpurge(stdin);
     printf("\n*******\nDigite a porta com que deseja se conectar:\n*******\n");
-    scanf("%s", c2.cliente2_port);
+    scanf("%s", get_port);
     __fpurge(stdin);
-    /*strcpy(c2.cliente2_ip, get_ip);
-    strcpy(c2.cliente2_port, get_port);*/
+    fflush(stdin);
+    strcpy(c2.cliente2_ip, get_ip);
+    strcpy(c2.cliente2_port, get_port);
     return c2;
 }
 
@@ -49,10 +55,10 @@ int main(void)
     struct sockaddr_in sock;
     int con, sockid;
     int port = 5004;
-    char ip_cliente2[20];
-    char port_cliente2[20];
-    char buffer_recv[BUFFER_SIZE];
-    char buffer_send[BUFFER_SIZE];
+    char ip_cliente2[20] = {0};
+    char port_cliente2[20] = {0};
+    char buffer_recv[BUFFER_SIZE] = {0};
+    char buffer_send[BUFFER_SIZE] = {0};
     struct in_addr addr;
     sockid = socket(AF_INET, SOCK_STREAM, 0); // criando o socket
     bzero(&(sock), sizeof(sock));
@@ -84,9 +90,10 @@ int main(void)
         }
         if (strcmp(buffer_recv, "2") == 0)
         {
-            printf("Buffer valor porta: %s", c2_main.cliente2_ip);
-            send(sockid, c2_main.cliente2_port, strlen(c2_main.cliente2_port), 0);
-            bzero(c2_main.cliente2_port, sizeof(c2_main.cliente2_port));
+            printf("Buffer valor porta: %s", c2_main.cliente2_port);
+            strcpy(buffer_send, c2_main.cliente2_port);
+            send(sockid, buffer_send, strlen(buffer_send), 0);
+            bzero(buffer_send, sizeof(buffer_send));
             bzero(buffer_recv, sizeof(buffer_recv));
         }
         if (buffer_recv[0] == '3')
