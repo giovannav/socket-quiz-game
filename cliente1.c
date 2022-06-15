@@ -78,19 +78,16 @@ int main(void)
     bzero(buffer_recv, sizeof(buffer_recv));
     while (recv(sockid, buffer_recv, BUFFER_SIZE, 0) != 0)
     {
-        printf("Buffer valor buffer: \n%s\n", buffer_recv);
-
+       // printf("\n%s\n", buffer_recv);
         if (strcmp(buffer_recv, "1") == 0)
         {
-            printf("Buffer valor ip: %s", c2_main.cliente2_ip);
             strcpy(buffer_send, c2_main.cliente2_ip);
             send(sockid, buffer_send, strlen(buffer_send), 0);
-            bzero(buffer_send, sizeof(buffer_send)); // <----- parei aqui 12:56 13/06
+            bzero(buffer_send, sizeof(buffer_send));
             bzero(buffer_recv, sizeof(buffer_recv));
         }
         if (strcmp(buffer_recv, "2") == 0)
         {
-            printf("Buffer valor porta: %s", c2_main.cliente2_port);
             strcpy(buffer_send, c2_main.cliente2_port);
             send(sockid, buffer_send, strlen(buffer_send), 0);
             bzero(buffer_send, sizeof(buffer_send));
@@ -98,6 +95,7 @@ int main(void)
         }
         if (buffer_recv[0] == '3')
         {
+            printf("\n%s", buffer_recv);
             scanf("%s", buffer_send);
             __fpurge(stdin);
             send(sockid, buffer_send, strlen(buffer_send), 0);
@@ -106,38 +104,19 @@ int main(void)
         }
         if (buffer_recv[0] == '4')
         {
-            printf("Buffer: \n%s\n", buffer_recv);
+
+            //printf("Buffer: \n%s\n", buffer_recv);
             bzero(buffer_send, sizeof(buffer_send));
             send(sockid, "ready", strlen("ready"), 0);
 
             for (int i = 0; i < 3; i++)
             {
                 recv(sockid, buffer_recv, BUFFER_SIZE, 0);
-                printf("%s ", buffer_recv);
+                printf("%s", buffer_recv);
                 fgets(buffer_send, BUFFER_SIZE, stdin);
                 __fpurge(stdin);
-                fflush(stdin);
-                printf("Pergunta %s\n", buffer_send);
-                send(sockid, buffer_send, strlen(buffer_send), 0);
-                bzero(buffer_send, sizeof(buffer_send));
-                bzero(buffer_recv, sizeof(buffer_recv));
-
-                recv(sockid, buffer_recv, BUFFER_SIZE, 0);
-                printf("%s ", buffer_recv);
-                fgets(buffer_send, BUFFER_SIZE, stdin);
-                __fpurge(stdin);
-                fflush(stdin);
-                printf("Resposta 1: %s\n", buffer_send);
-                send(sockid, buffer_send, strlen(buffer_send), 0);
-                bzero(buffer_send, sizeof(buffer_send));
-                bzero(buffer_recv, sizeof(buffer_recv));
-
-                recv(sockid, buffer_recv, BUFFER_SIZE, 0);
-                printf("%s ", buffer_recv);
-                fgets(buffer_send, BUFFER_SIZE, stdin);
-                __fpurge(stdin);
-                fflush(stdin);
-                printf("Resposta 2: %s\n", buffer_send);
+               // fflush(stdin);
+               // printf("Pergunta %s\n", buffer_send);
                 send(sockid, buffer_send, strlen(buffer_send), 0);
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_recv, sizeof(buffer_recv));
@@ -146,8 +125,8 @@ int main(void)
                 printf("%s", buffer_recv);
                 fgets(buffer_send, BUFFER_SIZE, stdin);
                 __fpurge(stdin);
-                fflush(stdin);
-                printf("Resposta 3: %s\n", buffer_send);
+               // fflush(stdin);
+               // printf("Resposta 1: %s\n", buffer_send);
                 send(sockid, buffer_send, strlen(buffer_send), 0);
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_recv, sizeof(buffer_recv));
@@ -156,8 +135,8 @@ int main(void)
                 printf("%s", buffer_recv);
                 fgets(buffer_send, BUFFER_SIZE, stdin);
                 __fpurge(stdin);
-                fflush(stdin);
-                printf("Resposta 4: %s\n", buffer_send);
+               // fflush(stdin);
+               // printf("Resposta 2: %s\n", buffer_send);
                 send(sockid, buffer_send, strlen(buffer_send), 0);
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_recv, sizeof(buffer_recv));
@@ -166,12 +145,39 @@ int main(void)
                 printf("%s", buffer_recv);
                 fgets(buffer_send, BUFFER_SIZE, stdin);
                 __fpurge(stdin);
-                fflush(stdin);
-                printf("Resposta certa: %s\n", buffer_send);
+               // fflush(stdin);
+               // printf("Resposta 3: %s\n", buffer_send);
+                send(sockid, buffer_send, strlen(buffer_send), 0);
+                bzero(buffer_send, sizeof(buffer_send));
+                bzero(buffer_recv, sizeof(buffer_recv));
+
+                recv(sockid, buffer_recv, BUFFER_SIZE, 0);
+                printf("%s", buffer_recv);
+                fgets(buffer_send, BUFFER_SIZE, stdin);
+                __fpurge(stdin);
+               // fflush(stdin);
+               // printf("Resposta 4: %s\n", buffer_send);
+                send(sockid, buffer_send, strlen(buffer_send), 0);
+                bzero(buffer_send, sizeof(buffer_send));
+                bzero(buffer_recv, sizeof(buffer_recv));
+
+                recv(sockid, buffer_recv, BUFFER_SIZE, 0);
+                printf("%s", buffer_recv);
+                fgets(buffer_send, BUFFER_SIZE, stdin);
+                __fpurge(stdin);
+               // fflush(stdin);
+               // printf("Resposta certa: %s\n", buffer_send);
                 send(sockid, buffer_send, strlen(buffer_send), 0);
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_recv, sizeof(buffer_recv));
             }
+        }
+
+       /* recv(sockid, buffer_recv, BUFFER_SIZE, 0);*/
+        if (buffer_recv[0] == 5)
+        {
+            printf("\nEntrou na comparação");
+            printf("\n%s", buffer_recv);
         }
 
         bzero(buffer_recv, sizeof(buffer_recv));
