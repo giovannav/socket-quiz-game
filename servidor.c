@@ -11,7 +11,7 @@
 
 #define tamanho_buffer 2048
 
-typedef struct
+struct pergunta
 {
     char pergunta[tamanho_buffer];
     char resp_1[tamanho_buffer];
@@ -20,15 +20,9 @@ typedef struct
     char resp_4[tamanho_buffer];
     char resp_certa[tamanho_buffer];
 
-} Pergunta;
+};
 
-
-int compare_clientes(int pontoscliente2)
-{
-    return pontoscliente2;
-}
-
-int connect_client2(char *ip, char *port, Pergunta pcliente1[3], int socket_cliente1)
+struct pergunta *connect_client2(char *ip, char *port, struct pergunta pcliente1[3])
 {
     struct sockaddr_in sock;
     int con, sockid;
@@ -36,7 +30,8 @@ int connect_client2(char *ip, char *port, Pergunta pcliente1[3], int socket_clie
     sock.sin_family = AF_INET;
     sock.sin_port = htons(atoi(port));
     inet_pton(AF_INET, ip, &sock.sin_addr);
-    Pergunta p[3] = {0};
+    struct pergunta *p;
+    p = malloc(sizeof(struct pergunta));
     char buffer[tamanho_buffer] = {0};
     char con_info[9] = {0};
     char msg[20000] = {0};
@@ -101,7 +96,7 @@ int connect_client2(char *ip, char *port, Pergunta pcliente1[3], int socket_clie
                     bzero(msg_received, sizeof(msg_received));
                     bzero(msg, sizeof(msg));
 
-                   sprintf(msg, "\nInsira a resposta 3 (pergunta %d): ", i+1);
+                    sprintf(msg, "\nInsira a resposta 3 (pergunta %d): ", i+1);
                     printf("\nMensagem: %s\n", msg);
                     send(sockid, msg, strlen(msg), 0);
                     recv(sockid, msg_received, sizeof(msg_received), 0);
@@ -227,21 +222,21 @@ int connect_client2(char *ip, char *port, Pergunta pcliente1[3], int socket_clie
                     bzero(msg, sizeof(msg));
                 }
 
+                close(sockid);
+                return p;
+                exit(0);
             }
-
-            close(sockid);
         }
-
-        return sockid;
+        //exit(0);
     }
 }
 
 int main(void)
 {
-    Pergunta p[3] = {0};
+    struct pergunta p[3] = {0};
     int socket_con;
     struct sockaddr_in servidor;
-    char buffer_send[tamanho_buffer] = {0};
+    char buffer_send[20000] = {0};
     char buffer_receive[tamanho_buffer] = {0};
     char ip_cliente2[20];
     char port_cliente2[20];
@@ -396,31 +391,96 @@ int main(void)
                         bzero(buffer_receive, sizeof(buffer_receive));
                         bzero(buffer_send, sizeof(buffer_send));
                     }
-                }
-                printf("\nFim do for.\n");
-                for (int j = 0; j < 3; j++)
-                {
-                    printf("\nPergunta: %s", p[j].pergunta);
-                    printf("\nResposta 1: %s", p[j].resp_1);
-                    printf("\nResposta 2: %s", p[j].resp_2);
-                    printf("\nResposta 3: %s", p[j].resp_3);
-                    printf("\nResposta 4: %s", p[j].resp_4);
-                    printf("\nResposta certa: %s", p[j].resp_certa);
-                }
 
-                // ---- Chama a conexão para a porta 2
-                printf("\nChamando conexão");
-                int a = connect_client2(ip_cliente2, port_cliente2, p, socket_cliente1); // <---- parei aqui
-                printf("\nConexão chamada %d", a);
-                //  ------------------------------
+                    // ---- Chama a conexão para a porta 2
+                    printf("\nChamando conexão");
+                    struct pergunta* pcliente2 = connect_client2(ip_cliente2, port_cliente2, p);
+                    printf("\nConexão chamada %s", "Conexão chamada aqui <-----------");
+                    printf("\nValor da pergunta %s", pcliente2[0].pergunta);
+                    printf("\nValor da pergunta %s", pcliente2[1].pergunta);
+                    printf("\nValor da pergunta %s", pcliente2[2].pergunta);
+                
+                }
+                
+
+                /*int pontos_cliente1 = 0;
+
+                sprintf(buffer_send, "5Pergunta 1: %s \na) %s \nb) %s \nc) %s \nd) %s \nDigite a sua resposta (a, b, c ou d):", pcliente2[0].pergunta, pcliente2[0].resp_1, pcliente2[0].resp_2, pcliente2[0].resp_3, pcliente2[0].resp_4);
+                printf("\nAlternativa certa: %s\n", pcliente2[0].resp_certa);
+                send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                bzero(buffer_receive, sizeof(buffer_receive));
+                recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                printf("\nResposta do cliente 1: %s\n", buffer_receive);
+                if (buffer_receive[0] == pcliente2[0].resp_certa[0])
+                {
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                    pontos_cliente1 = pontos_cliente1 + 50;
+                    sprintf(buffer_send, "Resposta correta!\nVocê tem %d pontos!\n", pontos_cliente1);
+                    send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                    printf("\nValor em msg: %s\n", buffer_send);
+                    recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                    printf("\nResposta do cliente 2: %s\n", buffer_receive);
+                    bzero(buffer_send, sizeof(buffer_send));
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                }
+                else
+                {
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                    strcpy(buffer_send, "Resposta errada!\n");
+                    send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                    recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                    printf("\nResposta do cliente 2: %s\n", buffer_receive);
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                }
+                bzero(buffer_receive, sizeof(buffer_receive));
+                /// -----------------------
+                sprintf(buffer_send, "6Pergunta 2: %s \na) %s \nb) %s \nc) %s \nd) %s \nDigite a sua resposta (a, b, c ou d): ", pcliente2[1].pergunta, pcliente2[1].resp_1, pcliente2[1].resp_2, pcliente2[1].resp_3, pcliente2[1].resp_4);
+                printf("\nAlternativa certa: %s\n", pcliente2[1].pergunta);
+                printf("\nAlternativa certa: %s\n", pcliente2[1].resp_1);
+                printf("\nAlternativa certa: %s\n", pcliente2[1].resp_2);
+                printf("\nAlternativa certa: %s\n", pcliente2[1].resp_3);
+                printf("\nAlternativa certa: %s\n", pcliente2[1].resp_4);
+
+                send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                bzero(buffer_receive, sizeof(buffer_receive));
+                recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                printf("\nResposta do cliente 1: %s\n", buffer_receive);
+                if (buffer_receive[0] == pcliente2[1].resp_certa[0])
+                {
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                    pontos_cliente1 = pontos_cliente1 + 50;
+                    sprintf(buffer_send, "Resposta correta!\nVocê tem %d pontos!\n", pontos_cliente1);
+                    send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                    printf("\nValor em msg: %s\n", buffer_send);
+                    recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                    printf("\nResposta do cliente 1: %s\n", buffer_receive);
+                    bzero(buffer_send, sizeof(buffer_send));
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                }
+                else
+                {
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                    strcpy(buffer_send, "Resposta errada!\n");
+                    send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                    recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+                    printf("\nResposta do cliente 1: %s\n", buffer_receive);
+                    bzero(buffer_receive, sizeof(buffer_receive));
+                    bzero(buffer_send, sizeof(buffer_send));
+                }
+                bzero(buffer_receive, sizeof(buffer_receive));*/
             }
             else
             {
                 strcpy(buffer_send, "\n\nJogo cancelado.\n\n");
                 send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
             }
-           // close(socket_cliente1);
-           // exit(0);
+            close(socket_cliente1);
+            exit(0);
         }
         else
         { 

@@ -188,7 +188,9 @@ int main(void)
                     bzero(buffer_recv, sizeof(buffer_recv));
                 }
             }
+            close(sockid);
+            exit(0);
         }
-    }
-    close(sockid);
+    }close(sockid);
+    
 }
