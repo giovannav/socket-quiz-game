@@ -10,27 +10,78 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <locale.h>
+#include <ctype.h>
 
-#define BUFFER_SIZE 1024
-#define QUESTION_SIZE 2048
+#define BUFFER_SIZE 4096
+
+void separador()
+{
+    printf("\n=^..^= =^..^= =^..^= =^..^= =^..^= =^..^= \n");
+}
+
+void aguarde()
+{
+    printf("\n\n");
+    printf("\nAguarde o player 1 :)\n");
+    printf("\n** * **   * **  *   *");
+    printf("\n    *   *  *  *\n");
+    printf("\n  *            *\n");
+    printf("\n*  *            \n");
+}
+
+void fim()
+{
+    printf("\n\n");
+    printf("\nObrigado por jogar! :)\n");
+    printf("\n** * **   * **  *   *");
+    printf("\n    *   *  *  *\n");
+    printf("\n  *            *\n");
+    printf("\n*  *            \n");
+}
+
+void welcome()
+{
+    separador();
+    printf("\n ____  ____  __  __    _  _  ____  _  _  ____  _____");
+    printf("\n(  _ \\( ___)(  \\/  )  ( \\/ )(_  _)( \\( )(  _ \\(  _  )");
+    printf("\n ) _ < )__)  )    (    \\  /  _)(_  )  (  )(_) ))(_)(");
+    printf("\n(____/(____)(_/\\/\\_)    \\/  (____)(_)\\_)(____/(_____)");
+    printf("\n\n");
+    separador();
+    printf("\nVocê é o player 2! \n");
+    printf("\nO jogo conta com 3 perguntas com 4 alternativas\n");
+    printf("\nCuidado: o tamanho máximo de uma pergunta/questão é de 4096 bytes. :)\n");
+    printf("\nPressione enter para passar para a próxima pergunta/questão.\n");
+    printf("\n--> AGUARDE QUANDO O JOGO PEDIR <---\n");
+    printf("\n Cada questão vale 50 pontos, quem fizer mais pontos ao final, ganha o jogo!\n");
+    printf("\n BOA SORTE! <3.\n");
+    printf("\n");
+    printf("\nAguarde o player 1 iniciar o quiz.\n");
+    separador();
+    printf("\n");
+}
 
 int main(void)
 {
     // nc -l -p 5000
+
+    welcome();
 
     struct sockaddr_in sock;
     int con, sockid;
     char buffer[BUFFER_SIZE] = {0};
     sockid = socket(AF_INET, SOCK_STREAM, 0);
     sock.sin_family = AF_INET;
-    sock.sin_port = htons(5003);
+    // Sempre esperando na porta 10100
+    sock.sin_port = htons(10100);
     sock.sin_addr.s_addr = htonl(INADDR_ANY);
     char buffer_recv[BUFFER_SIZE] = {0};
+    char buffer_temp[BUFFER_SIZE] = {0};
 
     if (sockid < 0)
     {
         printf("Erro ao criar o socket.\n");
-        exit(1);
+        exit(0);
     }
 
     int opcao = 1;
@@ -40,7 +91,7 @@ int main(void)
     {
         printf("Erro ao fazer o bind.\n");
         close(sockid);
-        exit(1);
+        exit(0);
     }
 
     listen(sockid, 5);
@@ -59,6 +110,7 @@ int main(void)
         if (newSocket_1 < 0)
         {
             printf("Erro ao aceitar conexão. - socket 1\n");
+            exit(0);
         }
         else
         {
@@ -66,8 +118,12 @@ int main(void)
             {
                 if (buffer_recv[0] == '3')
                 {
-                    printf("\n%s", buffer_recv);
-                    scanf("%s", buffer_send);
+                    strcpy(buffer_temp, buffer_recv);
+                    buffer_temp[0] = '\n';
+                    printf("\n%s", buffer_temp);
+                    bzero(buffer_temp, sizeof(buffer_temp));
+                    scanf("%s", buffer_temp);
+                    buffer_send[0] = tolower(buffer_temp[0]);
                     __fpurge(stdin);
                     send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                     bzero(buffer_send, sizeof(buffer_send));
@@ -75,19 +131,16 @@ int main(void)
                 }
                 if (buffer_recv[0] == '4')
                 {
-                   // printf("Buffer valor buffer: \n%s\n", buffer_recv);
-                   // printf("Buffer: \n%s\n", buffer_recv);
                     bzero(buffer_send, sizeof(buffer_send));
                     send(newSocket_1, "ready", strlen("ready"), 0);
 
                     for (int i = 0; i < 3; i++)
                     {
+                        separador();
                         recv(newSocket_1, buffer_recv, BUFFER_SIZE, 0);
                         printf("%s", buffer_recv);
                         fgets(buffer_send, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                     //   fflush(stdin);
-                     //   printf("Pergunta %s\n", buffer_send);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
@@ -96,8 +149,6 @@ int main(void)
                         printf("%s", buffer_recv);
                         fgets(buffer_send, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                     //   fflush(stdin);
-                     //   printf("Resposta 1: %s\n", buffer_send);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
@@ -106,8 +157,6 @@ int main(void)
                         printf("%s", buffer_recv);
                         fgets(buffer_send, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                     //   fflush(stdin);
-                     //   printf("Resposta 2: %s\n", buffer_send);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
@@ -116,8 +165,6 @@ int main(void)
                         printf("%s", buffer_recv);
                         fgets(buffer_send, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                      //  fflush(stdin);
-                      //  printf("Resposta 3: %s\n", buffer_send);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
@@ -126,28 +173,30 @@ int main(void)
                         printf("%s", buffer_recv);
                         fgets(buffer_send, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                      //  fflush(stdin);
-                      //  printf("Resposta 4: %s\n", buffer_send);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
 
                         recv(newSocket_1, buffer_recv, BUFFER_SIZE, 0);
                         printf("%s", buffer_recv);
-                        fgets(buffer_send, BUFFER_SIZE, stdin);
+                        fgets(buffer_temp, BUFFER_SIZE, stdin);
                         __fpurge(stdin);
-                      //  fflush(stdin);
-                      //  printf("Resposta certa: %s\n", buffer_send);
+                        buffer_send[0] = tolower(buffer_temp[0]);
                         send(newSocket_1, buffer_send, strlen(buffer_send), 0);
                         bzero(buffer_send, sizeof(buffer_send));
                         bzero(buffer_recv, sizeof(buffer_recv));
+                        bzero(buffer_temp, sizeof(buffer_temp));
                     }
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
                 }
-                if(buffer_recv[0] == '5')
-                {      
-                    printf("\n%s", buffer_recv);
+                if (buffer_recv[0] == '5')
+                {
+                    separador();
+                    strcpy(buffer_temp, buffer_recv);
+                    buffer_temp[0] = '\n';
+                    separador();
+                    printf("\n%s", buffer_temp);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
                     scanf("%s", buffer_send);
@@ -158,10 +207,14 @@ int main(void)
                     send(newSocket_1, "1", strlen("1"), 0);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
+                    bzero(buffer_temp, sizeof(buffer_temp));
                 }
-                if(buffer_recv[0] == '6')
-                {      
-                    printf("\n%s", buffer_recv);
+                if (buffer_recv[0] == '6')
+                {
+                    strcpy(buffer_temp, buffer_recv);
+                    buffer_temp[0] = '\n';
+                    separador();
+                    printf("\n%s", buffer_temp);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
                     scanf("%s", buffer_send);
@@ -172,10 +225,14 @@ int main(void)
                     send(newSocket_1, "1", strlen("1"), 0);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
+                    bzero(buffer_temp, sizeof(buffer_temp));
                 }
-                if(buffer_recv[0] == '7')
-                {      
-                    printf("\n%s", buffer_recv);
+                if (buffer_recv[0] == '7')
+                {
+                    strcpy(buffer_temp, buffer_recv);
+                    buffer_temp[0] = '\n';
+                    separador();
+                    printf("\n%s", buffer_temp);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
                     scanf("%s", buffer_send);
@@ -186,11 +243,28 @@ int main(void)
                     send(newSocket_1, "1", strlen("1"), 0);
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_recv, sizeof(buffer_recv));
+                    bzero(buffer_temp, sizeof(buffer_temp));
+                    aguarde();
+                }
+                if (buffer_recv[0] == '8')
+                {
+                    strcpy(buffer_temp, buffer_recv);
+                    buffer_temp[0] = '\n';
+                    separador();
+                    printf("\n%s", buffer_temp);
+                    bzero(buffer_send, sizeof(buffer_send));
+                    bzero(buffer_recv, sizeof(buffer_recv));
+                    send(newSocket_1, "1", strlen("1"), 0);
+                    bzero(buffer_send, sizeof(buffer_send));
+                    bzero(buffer_recv, sizeof(buffer_recv));
+                    bzero(buffer_temp, sizeof(buffer_temp));
+                    separador();
+                    fim();
+                    close(sockid);
+                    exit(0);
                 }
             }
-            close(sockid);
-            exit(0);
         }
-    }close(sockid);
-    
+    }
+    close(sockid);
 }
