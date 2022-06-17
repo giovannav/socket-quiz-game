@@ -53,7 +53,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
         bzero(buffer_receive, sizeof(buffer_receive));
         if (*pontos_cliente2 > *pontos_cliente1)
         {
-            snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O cliente 1 fez %d pontos\n", *pontos_cliente1);
+            snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O player 1 fez %d pontos\n", *pontos_cliente1);
             send(sockid, buffer_send, strlen(buffer_send), 0);
             recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
             bzero(buffer_receive, sizeof(buffer_receive));
@@ -62,7 +62,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
         }
         else if (*pontos_cliente2 < *pontos_cliente1)
         {
-            snprintf(buffer_send, sizeof(buffer_send), "8Você perdeu! :( O cliente 1 fez %d pontos\n", *pontos_cliente1);
+            snprintf(buffer_send, sizeof(buffer_send), "8Você perdeu! :( O player 1 fez %d pontos\n", *pontos_cliente1);
             send(sockid, buffer_send, strlen(buffer_send), 0);
             recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
             bzero(buffer_receive, sizeof(buffer_receive));
@@ -71,7 +71,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
         }
         else
         {
-            snprintf(buffer_send, sizeof(buffer_send), "8Empate! :D O cliente 1 também fez %d pontos\n", *pontos_cliente1);
+            snprintf(buffer_send, sizeof(buffer_send), "8Empate! :D O player 1 também fez %d pontos\n", *pontos_cliente1);
             send(sockid, buffer_send, strlen(buffer_send), 0);
             recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
             bzero(buffer_receive, sizeof(buffer_receive));
@@ -468,7 +468,7 @@ int main(void)
 
                     if (pcliente1[0].pontos > pcliente2[0].pontos)
                     {
-                        snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O cliente 2 fez %d pontos\n", pcliente2[0].pontos);
+                        snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O player 2 fez %d pontos\n", pcliente2[0].pontos);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
                         bzero(buffer_receive, sizeof(buffer_receive));
@@ -476,7 +476,7 @@ int main(void)
                     }
                     else if (pcliente1[0].pontos < pcliente2[0].pontos)
                     {
-                        snprintf(buffer_send, sizeof(buffer_send), "8Você perdeu! :( O cliente 2 fez %d pontos\n", pcliente2[0].pontos);
+                        snprintf(buffer_send, sizeof(buffer_send), "8Você perdeu! :( O player 2 fez %d pontos\n", pcliente2[0].pontos);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
                         bzero(buffer_receive, sizeof(buffer_receive));
@@ -484,7 +484,7 @@ int main(void)
                     }
                     else
                     {
-                        snprintf(buffer_send, sizeof(buffer_send), "8Empate! :D O cliente 2 também fez %d pontos\n", pcliente2[0].pontos);
+                        snprintf(buffer_send, sizeof(buffer_send), "8Empate! :D O player 2 também fez %d pontos\n", pcliente2[0].pontos);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
                         bzero(buffer_receive, sizeof(buffer_receive));
