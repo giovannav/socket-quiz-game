@@ -123,6 +123,7 @@ int main(void)
                     printf("\n%s", buffer_temp);
                     bzero(buffer_temp, sizeof(buffer_temp));
                     scanf("%s", buffer_temp);
+                    
                     buffer_send[0] = tolower(buffer_temp[0]);
                     __fpurge(stdin);
                     send(newSocket_1, buffer_send, strlen(buffer_send), 0);
@@ -192,6 +193,7 @@ int main(void)
                 }
                 if (buffer_recv[0] == '5')
                 {
+                   
                     separador();
                     strcpy(buffer_temp, buffer_recv);
                     buffer_temp[0] = '\n';

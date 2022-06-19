@@ -212,6 +212,11 @@ int main(void)
 
         if (buffer_recv[0] == '5')
         {
+            if(strlen(buffer_recv) <= 73){
+                close(sockid);
+                break;
+                exit(0);
+            }
             separador();
             strcpy(buffer_temp, buffer_recv);
             buffer_temp[0] = '\n';
@@ -280,7 +285,6 @@ int main(void)
             bzero(buffer_temp, sizeof(buffer_temp));
             separador();
         }
-
         bzero(buffer_recv, sizeof(buffer_recv));
         bzero(buffer_send, sizeof(buffer_send));
     }
