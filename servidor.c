@@ -8,7 +8,6 @@
 #include <strings.h>
 #include <string.h>
 #include <sys/time.h>
-#include <time.h>
 
 // Definição dos tamanhos dos buffers e strings que serão usados na aplicação.
 #define tamanho_buffer 4096
@@ -32,7 +31,7 @@ struct pergunta
 // Função que irá iniciar o contato com o cliente 2 a partir do contato do cliente 1.
 void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pergunta pcliente1[3], int *pontos_cliente1, int *pontos_cliente2, int *is_game_end)
 {
-    // Declaração e popularização da struct que guarda os dados do socket.
+    // Declaração e preenchimento da struct que guarda os dados do socket.
     struct sockaddr_in sock;
     int con, sockid;
     sockid = socket(AF_INET, SOCK_STREAM, 0);
@@ -44,7 +43,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
     // Declaração e inicialização do buffer que irá enviar mensagens ao cliente 2.
     char buffer_send[tamanho_mensagem] = {0};
 
-    // Declaração e inicialização do buffer que irá enviar mensagens ao cliente 2.
+    // Declaração e inicialização do buffer que irá receber mensagens do cliente 2.
     char buffer_receive[tamanho_mensagem] = {0};
 
     // Variável que irá guardar o pontos do cliente 2.
@@ -63,7 +62,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
     }
 
     // A variável is_game_end, passada por parâmetro, será igual a 1 se o cliente 1 já
-    // tiver terminado o seu jogo, assim será possível comparar as pontuações.
+    // terminou o seu jogo, assim será possível comparar as pontuações.
     if (*is_game_end != 0)
     {
         bzero(buffer_send, sizeof(buffer_send));
@@ -75,19 +74,24 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
         // Caso o cliente 2 tenha feito mais pontos que o cliente 1, o cliente 2 ganha.
         if (*pontos_cliente2 > *pontos_cliente1)
         {
-            // A função snprint serve para concatenar as strign com os valores desejados.
+            // A função snprint serve para concatenar as strings com os valores desejados.
             snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O player 1 fez %d pontos\n", *pontos_cliente1);
+            
             // A string é enviada para o cliente 2.
             send(sockid, buffer_send, strlen(buffer_send), 0);
+
             // O cliente 2 irá enviar uma mensagem para o servidor confirmando o recebimento
             recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
-            // Ambas os buffers são zerados.
+
+            // Ambaos buffers são zerados.
             bzero(buffer_receive, sizeof(buffer_receive));
             bzero(buffer_send, sizeof(buffer_send));
+
             // O socket é fechado pois o jogo acabou.
             // O mesmo é repetido para as outras duas opções abaixo.
             close(sockid);
         }
+
         // Caso o cliente 2 tenha feito menos pontos que o cliente 1, o cliente 1 ganha.
         else if (*pontos_cliente2 < *pontos_cliente1)
         {
@@ -98,6 +102,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
             bzero(buffer_send, sizeof(buffer_send));
             close(sockid);
         }
+
         // Se não for nenhum dos casos acima, é enviada uma mensagem de empate.
         else
         {
@@ -111,7 +116,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
     }
     else
     {
-        // Envio das perguntas do servidor para o cliente 2 após a conexão com o cliente 2.
+        // Nesta seção é realizado o envio das perguntas do servidor para o cliente 2 após a conexão com o cliente 2.
         // Todas as mensgens possuem um número da frente, abaixo, por exemplo, possui o número 3.
         // Esta abordagem foi escolhida para evitar comparações com grandes strings do lado do cliente.
         strcpy(buffer_send, "3Deseja inicializar o jogo? (s/n): ");
@@ -121,8 +126,10 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
         // Se o caracter recebido for 's', significa que o cliente 2 deseja iniciar o jogo.
         if (buffer_receive[0] == 's')
         {
+            // Zerando os buffers.
             bzero(buffer_send, sizeof(buffer_send));
             bzero(buffer_receive, sizeof(buffer_receive));
+
             // O número 4 é enviado para o cliente 2, significando que o jogo foi iniciado, 
             // e o cliente 2 irá responder com a palavra "ready", significando que o cliente 2 está pronto para jogar.
             // O número 4 significa que o servidor irá começar a pedir que o cliente 2 insira as perguntas.
@@ -134,6 +141,7 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
             {
                 bzero(buffer_send, sizeof(buffer_send));
                 bzero(buffer_receive, sizeof(buffer_receive));
+
                 // São 3 perguntas no total, por isso a struct é populada dentro de uma iteração que vai de 0 a 2.
                 for (int i = 0; i < 3; i++)
                 {
@@ -141,11 +149,14 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
                     // é a pergunta atual.
                     sprintf(buffer_send, "\nInsira a %dª pergunta: ", i + 1);
                     send(sockid, buffer_send, strlen(buffer_send), 0);
+
                     // Será recebida uma string com a pergunta do cliente 2.
                     recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
+                    
                     // O valor do buffer de recebimento é então copiado para a struct de perguntas na posição apropriada.
                     strcpy(pcliente2[i].pergunta,buffer_receive);
                     // Ambos os buffers são zerados.
+                    
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_receive, sizeof(buffer_receive));
 
@@ -199,10 +210,13 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
                 // Após o cliente 2 inserir todas as perguntas, ele começará a responder as perguntas do cliente 1.
                 // A struct de perguntas do cliente 1 é passada para o cliente 2 via parâmetro da função.
                 sprintf(buffer_send, "5Pergunta 1: %s \na) %s \nb) %s \nc) %s \nd) %s \nDigite a sua resposta (a, b, c ou d): ", pcliente1[0].pergunta, pcliente1[0].resp_1, pcliente1[0].resp_2, pcliente1[0].resp_3, pcliente1[0].resp_4);
-                // A pergunto é enviada com o código 5.
+               
+                // A primeira perguntoa é enviada com o código 5.
                 send(sockid, buffer_send, strlen(buffer_send), 0);
+
                 // O servidor recebe a resposta do cliente 2.
                 recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
+
                 // O servidor compara a resposta do cliente 2 com a resposta certa.
                 if (buffer_receive[0] == pcliente1[0].resp_certa[0])
                 {   
@@ -211,10 +225,12 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
                     // Após isso, o cliente 2 ainda envia uma código de confirmação ao servidor.
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_receive, sizeof(buffer_receive));
+
                     // É somada à variável de contagem de pontos 50 pontos,
                     // e posteriormente é copiada ao campo da struct para passar para o cliente 1.
                     contagem_pontos_cliente2 = contagem_pontos_cliente2 + 50;
                     pcliente2[0].pontos = contagem_pontos_cliente2;
+
                     sprintf(buffer_send, "Resposta correta!\nVocê tem %d pontos!\n", contagem_pontos_cliente2);
                     send(sockid, buffer_send, strlen(buffer_send), 0);
                     recv(sockid, buffer_receive, sizeof(buffer_receive), 0);
@@ -297,16 +313,20 @@ void connect_client2(char *ip, char *port, struct pergunta *pcliente2, struct pe
                     bzero(buffer_send, sizeof(buffer_send));
                     bzero(buffer_receive, sizeof(buffer_receive));
                 }
+
                 // Após o envio e correção de perguntas, o socket é fechado.
                 close(sockid);
             }
         }
-        // Se a resposta for diferente de 's'.
+
+        // Se a resposta for diferente de 's', quer dizer que o cliente 2 não deseja iniciar o jogo.
         else
         {
             strcpy(buffer_send, "\n\nJogo cancelado.\n\n");
             send(sockid, buffer_send, strlen(buffer_send), 0);
         }
+
+        // O socket é fechado.
         close(sockid);
     }
 }
@@ -394,7 +414,7 @@ int main(void)
             char buffer_send[tamanho_mensagem] = {0};
             char buffer_receive[tamanho_mensagem] = {0};
 
-            // Declarando as variáveis que irão o endereço IP e porta do cliente 2.
+            // Declarando as variáveis que irão receber o endereço IP e porta do cliente 2.
             char ip_cliente2[20];
             char port_cliente2[20];
 
@@ -416,8 +436,10 @@ int main(void)
             // receber o endereço IP do cliente 2 com quem o cliente 1 deseja jogar.
             strcpy(buffer_send, "1");
             send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+
             // Recebe o endereço IP do cliente 2.
             recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+
             // Copia o endereço para um variável para ser usado porteriormente.
             strcpy(ip_cliente2, buffer_receive);
             bzero(buffer_receive, sizeof(buffer_receive));
@@ -427,8 +449,10 @@ int main(void)
             // receber a porta do cliente 2 com quem o cliente 1 deseja jogar
             strcpy(buffer_send, "2");
             send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+
             // Recebe o endereço IP do cliente 2.
             recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
+
             // Copia o endereço para um variável para ser usado porteriormente.
             strcpy(port_cliente2, buffer_receive);
             bzero(buffer_receive, sizeof(buffer_receive));
@@ -442,8 +466,8 @@ int main(void)
             send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
             recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
 
-            // Na iteração abaixo, após receber a confirmação que o cliente 1 deseja iniciar o jogo.
-            // É iniciada a iteração que irá popular a struct de perguntas do cliente 1 de acordo
+            // Na iteração abaixo, após receber a confirmação que o cliente 1 deseja iniciar o jogo,
+            // é iniciada a iteração que irá popular a struct de perguntas do cliente 1 de acordo
             // com as posições apropriadas.
             if (buffer_receive[0] == 's')
             {
@@ -461,6 +485,7 @@ int main(void)
                         // O servidor envia uma mensagem pedidndo a pergunta 1.
                         sprintf(buffer_send, "\nInsira a %dª pergunta: ", i + 1);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+
                         // Recebe o buffer com a pergunta 1 e o copia para a struct de perguntas do cliente 1.
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
                         strcpy(pcliente1[i].pergunta, buffer_receive);
@@ -514,8 +539,8 @@ int main(void)
                     bzero(buffer_receive, sizeof(buffer_receive));
 
                     // Nesta linha é chamada a conexão com o cliente 2.
-                    // Por parâmetros são enviados o endereço IP do cliente 2 com que o cliente 1 deseja se conectar.
-                    // A porta do cliente 2; a struct de perguntas do cliente 2 e cliente 1 e as suas respectivas pontuações.
+                    // Por parâmetros são enviados o endereço IP do cliente 2 com quem o cliente 1 deseja se conectar;
+                    // a porta do cliente 2; a struct de perguntas do cliente 2 e cliente 1 e as suas respectivas pontuações.
                     // Por fim, é passada a variável que indica se o jogo já acabou ou não.
                     connect_client2(ip_cliente2, port_cliente2, pcliente2, pcliente1, &pcliente1->pontos, &pcliente2->pontos, &is_game_end);
 
@@ -523,6 +548,7 @@ int main(void)
                     // do cliente 2 são enviadas para o cliente 1.                   
                     sprintf(buffer_send, "5Pergunta 1: %s \na) %s \nb) %s \nc) %s \nd) %s \nDigite a sua resposta (a, b, c ou d): ", pcliente2[0].pergunta, pcliente2[0].resp_1, pcliente2[0].resp_2, pcliente2[0].resp_3, pcliente2[0].resp_4);
                     send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                    
                     // A resposta da pergunta é recebida.
                     recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
 
@@ -534,10 +560,12 @@ int main(void)
                         // Após isso, o cliente 1 ainda envia uma código de confirmação ao servidor.
                         bzero(buffer_receive, sizeof(buffer_receive));
                         bzero(buffer_send, sizeof(buffer_send));
+                        
                         // Soma-se 50 pontos ao total de pontos do cliente 1 e
                         // a pontução é salva em sua struct de perguntas.
                         pontos_cliente1 = pontos_cliente1 + 50;
                         pcliente1[0].pontos = pontos_cliente1;
+
                         sprintf(buffer_send, "Resposta correta!\nVocê tem %d pontos!\n", pontos_cliente1);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
@@ -632,6 +660,7 @@ int main(void)
                         // Uma mensagem é enviada para o primeiro cliente dizendo que ele ganhou.
                         snprintf(buffer_send, sizeof(buffer_send), "8Você venceu! :D O player 2 fez %d pontos\n", pcliente2[0].pontos);
                         send(socket_cliente1, buffer_send, strlen(buffer_send), 0);
+                        
                         // O cliente 1 ainda envia um código de confirmação.
                         recv(socket_cliente1, buffer_receive, sizeof(buffer_receive), 0);
                         bzero(buffer_receive, sizeof(buffer_receive));
